@@ -2,7 +2,7 @@
 set -e
 
 # Construct the repository name with the image name
-REPO_NAME="${IMAGE_NAME}"
+REPO_NAME="${ORGID}-${BUID}-${APPID}/${IMAGE_NAME}"
 echo "Repository Name: $REPO_NAME"
 
 
