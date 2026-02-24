@@ -15,10 +15,44 @@ else
 fi
 
 # Docker Push Logic
-ECR_IMAGE="$REGISTRY/$REPO_NAME:$TAG"
+IFS=',' read -ra TAG_ARRAY <<< "$TAGS"
 
-echo "Tagging image as $ECR_IMAGE"
-docker tag "$IMAGE_NAME:$TAG" "$ECR_IMAGE"
+# Find a valid source tag from the local images
+SOURCE_TAG=""
+for t in "${TAG_ARRAY[@]}"; do
+  t="${t// /}"
+  if [ -n "$t" ] && docker image inspect "$IMAGE_NAME:$t" >/dev/null 2>&1; then
+    SOURCE_TAG="$t"
+    break
+  fi
+done
 
-echo "Pushing image to ECR"
-docker push "$ECR_IMAGE"
+# Fallback if no tag from the list exists locally
+if [ -z "$SOURCE_TAG" ]; then
+  if docker image inspect "$IMAGE_NAME:latest" >/dev/null 2>&1; then
+    SOURCE_TAG="latest"
+  else
+    # Let it fail naturally on the first tag
+    SOURCE_TAG="${TAG_ARRAY[0]// /}"
+  fi
+fi
+
+for raw_tag in "${TAG_ARRAY[@]}"; do
+  TAG="${raw_tag// /}"
+  if [ -z "$TAG" ]; then
+    continue
+  fi
+
+  ECR_IMAGE="$REGISTRY/$REPO_NAME:$TAG"
+  echo "Tagging image as $ECR_IMAGE"
+
+  if docker image inspect "$IMAGE_NAME:$TAG" >/dev/null 2>&1; then
+    docker tag "$IMAGE_NAME:$TAG" "$ECR_IMAGE"
+  else
+    echo "Warning: Local image $IMAGE_NAME:$TAG not found. Using $IMAGE_NAME:$SOURCE_TAG as source."
+    docker tag "$IMAGE_NAME:$SOURCE_TAG" "$ECR_IMAGE"
+  fi
+
+  echo "Pushing image to ECR"
+  docker push "$ECR_IMAGE"
+done
