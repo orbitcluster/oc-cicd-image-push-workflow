@@ -4,7 +4,7 @@ inputs:
   image-name:
     description: "Image name"
     required: true
-  tag:
+  tags:
     description: "Image tag"
     required: true
   appid:
@@ -56,7 +56,7 @@ runs:
         BUID: ${{ inputs.buid }}
         APPID: ${{ inputs.appid }}
         REGION: ${{ inputs.region }}
-        TAG: ${{ inputs.tag }}
+        TAGS: ${{ inputs.tags }}
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_NAME: ${{ inputs.image-name }}
 

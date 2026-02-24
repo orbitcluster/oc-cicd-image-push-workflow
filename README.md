@@ -19,7 +19,7 @@ This composite action performs the following steps:
 | ---------------- | ------------------------------------ | -------- | ----------- |
 | `image_type`     | Image type                           | `false`  | `docker`    |
 | `image-name`     | Local image name to push             | `true`   |             |
-| `tag`            | Image tag                            | `true`   |             |
+| `tags`           | Image tags (comma-separated)         | `true`   |             |
 | `appid`          | Application ID (used for repo name)  | `true`   |             |
 | `orgid`          | Organization ID (used for repo name) | `true`   |             |
 | `buid`           | Build ID (used for repo name)        | `true`   |             |
@@ -38,7 +38,7 @@ steps:
     uses: ./path/to/oc-cicd-docker-push-workflow
     with:
       image-name: my-app-image
-      tag: ${{ github.sha }}
+      tags: ${{ github.sha }}
       orgid: myorg
       buid: myunit
       appid: myapp
